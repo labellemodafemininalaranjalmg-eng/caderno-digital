@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Caderno Digital v4</title>
+    <style>
+        :root { 
+            --primary: #2c3e50; 
+            --accent: #3498db;
+            --bg: #eceff1; 
+            --text: #2c3e50; 
+            --white: #ffffff; 
+            --border: #d1d9e0;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        .container { width: 100%; max-width: 800px; }
+
+        header { text-align: center; margin-bottom: 30px; }
+
+        /* Estilo do Card de Entrada */
+        .card { 
+            background: var(--white); 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+            margin-bottom: 30px; 
+        }
+
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus { border-color: var(--accent); }
+
+        textarea { height: 150px; resize: vertical; font-family: 'Courier New', monospace; }
+
+        button { 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            color: white; 
+            transition: transform 0.1s, opacity 0.2s; 
+        }
+
+        button:active { transform: scale(0.98); }
+
+        #saveBtn { background: var(--accent); width: 100%; font-size: 1rem; margin-top: 10px; }
+
+        /* Estilo das Entradas Salvas */
+        .entry { 
+            background: var(--white); 
+            margin-bottom: 25px; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border-top: 4px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+        }
+
+        .entry h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.5rem; }
+        .entry small { color: #7f8c8d; display: block; margin-bottom: 15px; }
+
+        /* NOVO ESTILO: Bloco de Código Branco */
+        code-block { 
+            display: block; 
+            white-space: pre-wrap; 
+            background: #fdfdfd; /* Branco levemente off-white para contraste */
+            color: #333; 
+            padding: 15px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 6px; 
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            line-height: 1.5;
+        }
+
+        .actions { display: flex; gap: 10px; }
+        .btn-edit { background: #95a5a6; }
+        .btn-del { background: #e74c3c; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📓 Meu Diário de Estudos</h1>
+        <p>Organize seus códigos e matérias</p>
+    </header>
+    
+    <div class="card">
+        <input type="text" id="subject" placeholder="Assunto da aula">
+        <input type="date" id="date">
+        <textarea id="content" placeholder="Escreva aqui... (códigos HTML/JS são aceitos)"></textarea>
+        <button id="saveBtn" onclick="handleSave()">Salvar no Caderno</button>
+    </div>
+
+    <div id="entriesContainer"></div>
+</div>
+
+<script>
+    // Usando uma nova chave para evitar conflitos com versões anteriores
+    let notebookData = JSON.parse(localStorage.getItem('my_notebook_v4')) || [];
+    let currentEditId = null;
+
+    window.onload = () => {
+        document.getElementById('date').valueAsDate = new Date();
+        render();
+    };
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[m]);
+    }
+
+    function handleSave() {
+        const subject = document.getElementById('subject').value;
+        const date = document.getElementById('date').value;
+        const content = document.getElementById('content').value;
+
+        if (!subject || !content) {
+            alert("Preencha os campos obrigatórios!");
+            return;
+        }
+
+        if (currentEditId) {
+            const index = notebookData.findIndex(item => item.id === currentEditId);
+            notebookData[index] = { id: currentEditId, subject, date, content };
+            currentEditId = null;
+            document.getElementById('saveBtn').innerText = "Salvar no Caderno";
+        } else {
+            const newEntry = { id: Date.now().toString(), subject, date, content };
+            notebookData.push(newEntry);
+        }
+
+        localStorage.setItem('my_notebook_v4', JSON.stringify(notebookData));
+        clearForm();
+        render();
+    }
+
+    function deleteItem(id) {
+        if (confirm("Deseja excluir esta anotação?")) {
+            notebookData = notebookData.filter(item => item.id !== id);
+            localStorage.setItem('my_notebook_v4', JSON.stringify(notebookData));
+            render();
+        }
+    }
+
+    function editItem(id) {
+        const item = notebookData.find(i => i.id === id);
+        if (item) {
+            document.getElementById('subject').value = item.subject;
+            document.getElementById('date').value = item.date;
+            document.getElementById('content').value = item.content;
+            currentEditId = id;
+            document.getElementById('saveBtn').innerText = "Atualizar Anotação";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('subject').value = '';
+        document.getElementById('content').value = '';
+        document.getElementById('date').valueAsDate = new Date();
+    }
+
+    function render() {
+        const container = document.getElementById('entriesContainer');
+        container.innerHTML = '';
+
+        // Ordenar por ID (data de criação) decrescente
+        const sorted = [...notebookData].sort((a, b) => b.id.localeCompare(a.id));
+
+        sorted.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'entry';
+            
+            const safeContent = escapeHTML(item.content);
+            const displayDate = item.date.split('-').reverse().join('/');
+
+            div.innerHTML = `
+                <h3>${escapeHTML(item.subject)}</h3>
+                <small>📅 ${displayDate}</small>
+                <code-block>${safeContent}</code-block>
+                <div class="actions">
+                    <button class="btn-edit" onclick="editItem('${item.id}')">Editar</button>
+                    <button class="btn-del" onclick="deleteItem('${item.id}')">Apagar</button>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+</script>
+
+</body>
+</html>
