@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Caderno Digital v4</title>
+    <title>Protótipo para modificações</title>
     <style>
         :root { 
             --primary: #2c3e50; 
@@ -98,6 +98,12 @@
         .actions { display: flex; gap: 10px; }
         .btn-edit { background: #95a5a6; }
         .btn-del { background: #e74c3c; }
+        .dica-footer {
+    color: #3498db;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+}
 
     </style>
 </head>
@@ -113,10 +119,19 @@
         <input type="text" id="subject" placeholder="Assunto da aula">
         <input type="date" id="date">
         <textarea id="content" placeholder="Escreva aqui... (códigos HTML/JS são aceitos)"></textarea>
+                <label for="subject">Assunto:</label>
+        <input type="text" id="subject" placeholder="Ex: Aula de Flexbox">  
+
         <button id="saveBtn" onclick="handleSave()">Salvar no Caderno</button>
     </div>
 
     <div id="entriesContainer"></div>
+
+    <footer>
+    <hr>
+</footer>
+    <p>Dica: Use <code>&lt;br&gt;</code> para pular linhas no seu conteúdo.</p>
+
 </div>
 
 <script>
