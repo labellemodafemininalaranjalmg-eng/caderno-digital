@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protótipo para modificações</title>
+    <title>Meu Diário de Estudos</title>
     <style>
         :root { 
             --primary: #2c3e50; 
@@ -24,10 +24,8 @@
         }
 
         .container { width: 100%; max-width: 800px; }
-
         header { text-align: center; margin-bottom: 30px; }
 
-        /* Estilo do Card de Entrada */
         .card { 
             background: var(--white); 
             padding: 25px; 
@@ -36,10 +34,12 @@
             margin-bottom: 30px; 
         }
 
+        label { display: block; margin-top: 10px; font-weight: bold; color: var(--primary); }
+
         input, textarea { 
             width: 100%; 
             padding: 12px; 
-            margin: 10px 0; 
+            margin: 5px 0 15px 0; 
             border: 1px solid var(--border); 
             border-radius: 8px; 
             box-sizing: border-box; 
@@ -49,7 +49,6 @@
         }
 
         input:focus, textarea:focus { border-color: var(--accent); }
-
         textarea { height: 150px; resize: vertical; font-family: 'Courier New', monospace; }
 
         button { 
@@ -62,11 +61,8 @@
             transition: transform 0.1s, opacity 0.2s; 
         }
 
-        button:active { transform: scale(0.98); }
+        #saveBtn { background: var(--accent); width: 100%; font-size: 1rem; }
 
-        #saveBtn { background: var(--accent); width: 100%; font-size: 1rem; margin-top: 10px; }
-
-        /* Estilo das Entradas Salvas */
         .entry { 
             background: var(--white); 
             margin-bottom: 25px; 
@@ -79,32 +75,26 @@
         .entry h3 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.5rem; }
         .entry small { color: #7f8c8d; display: block; margin-bottom: 15px; }
 
-        /* NOVO ESTILO: Bloco de Código Branco */
         code-block { 
             display: block; 
             white-space: pre-wrap; 
-            background: #fdfdfd; /* Branco levemente off-white para contraste */
+            background: #fdfdfd; 
             color: #333; 
             padding: 15px; 
             border: 1px solid #e0e0e0; 
             border-radius: 6px; 
-            font-family: 'Consolas', 'Monaco', monospace;
+            font-family: 'Consolas', monospace;
             font-size: 14px;
             margin-bottom: 15px;
-            overflow-x: auto;
             line-height: 1.5;
         }
 
         .actions { display: flex; gap: 10px; }
         .btn-edit { background: #95a5a6; }
         .btn-del { background: #e74c3c; }
-        .dica-footer {
-    color: #3498db;
-    font-weight: bold;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
+        
+        footer { margin-top: 40px; text-align: center; color: #7f8c8d; }
+        .dica { color: var(--accent); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -116,27 +106,29 @@
     </header>
     
     <div class="card">
-        <input type="text" id="subject" placeholder="Assunto da aula">
+        <label for="subject">Assunto:</label>
+        <input type="text" id="subject" placeholder="Ex: Aula de Flexbox">
+        
+        <label for="date">Data:</label>
         <input type="date" id="date">
+        
+        <label for="content">Conteúdo:</label>
         <textarea id="content" placeholder="Escreva aqui... (códigos HTML/JS são aceitos)"></textarea>
-                <label for="subject">Assunto:</label>
-        <input type="text" id="subject" placeholder="Ex: Aula de Flexbox">  
-
+        
         <button id="saveBtn" onclick="handleSave()">Salvar no Caderno</button>
     </div>
 
     <div id="entriesContainer"></div>
 
     <footer>
-    <hr>
-</footer>
-    <p>Dica: Use <code>&lt;br&gt;</code> para pular linhas no seu conteúdo.</p>
-
+        <hr>
+        <p>Dica: Use <span class="dica">&lt;br&gt;</span> para pular linhas no seu conteúdo.</p>
+    </footer>
 </div>
 
 <script>
-    // Usando uma nova chave para evitar conflitos com versões anteriores
-    let notebookData = JSON.parse(localStorage.getItem('my_notebook_v4')) || [];
+    // Usando uma nova chave para garantir que salve do zero sem erros
+    let notebookData = JSON.parse(localStorage.getItem('my_notebook_v5')) || [];
     let currentEditId = null;
 
     window.onload = () => {
@@ -151,26 +143,37 @@
     }
 
     function handleSave() {
-        const subject = document.getElementById('subject').value;
-        const date = document.getElementById('date').value;
-        const content = document.getElementById('content').value;
+        const subjectField = document.getElementById('subject');
+        const dateField = document.getElementById('date');
+        const contentField = document.getElementById('content');
+
+        const subject = subjectField.value.trim();
+        const date = dateField.value;
+        const content = contentField.value.trim();
 
         if (!subject || !content) {
-            alert("Preencha os campos obrigatórios!");
+            alert("Preencha o assunto e o conteúdo!");
             return;
         }
 
         if (currentEditId) {
             const index = notebookData.findIndex(item => item.id === currentEditId);
-            notebookData[index] = { id: currentEditId, subject, date, content };
+            if (index !== -1) {
+                notebookData[index] = { id: currentEditId, subject, date, content };
+            }
             currentEditId = null;
             document.getElementById('saveBtn').innerText = "Salvar no Caderno";
         } else {
-            const newEntry = { id: Date.now().toString(), subject, date, content };
+            const newEntry = { 
+                id: Date.now().toString(), 
+                subject, 
+                date, 
+                content 
+            };
             notebookData.push(newEntry);
         }
 
-        localStorage.setItem('my_notebook_v4', JSON.stringify(notebookData));
+        localStorage.setItem('my_notebook_v5', JSON.stringify(notebookData));
         clearForm();
         render();
     }
@@ -178,7 +181,7 @@
     function deleteItem(id) {
         if (confirm("Deseja excluir esta anotação?")) {
             notebookData = notebookData.filter(item => item.id !== id);
-            localStorage.setItem('my_notebook_v4', JSON.stringify(notebookData));
+            localStorage.setItem('my_notebook_v5', JSON.stringify(notebookData));
             render();
         }
     }
@@ -205,7 +208,7 @@
         const container = document.getElementById('entriesContainer');
         container.innerHTML = '';
 
-        // Ordenar por ID (data de criação) decrescente
+        // Ordenar: os mais recentes primeiro
         const sorted = [...notebookData].sort((a, b) => b.id.localeCompare(a.id));
 
         sorted.forEach(item => {
@@ -213,7 +216,7 @@
             div.className = 'entry';
             
             const safeContent = escapeHTML(item.content);
-            const displayDate = item.date.split('-').reverse().join('/');
+            const displayDate = item.date ? item.date.split('-').reverse().join('/') : '--/--/----';
 
             div.innerHTML = `
                 <h3>${escapeHTML(item.subject)}</h3>
