@@ -3,7 +3,7 @@
 Este é um projeto de **Caderno Digital** desenvolvido como parte do curso de Desenvolvimento de Sistemas. O objetivo é permitir que o usuário crie, armazene e gerencie notas de estudo de forma simples e eficiente diretamente no navegador.
 
 ## Tecnlogias Utilizadas
-* **HTML5/CSS3:** Estruturação e estilização da interface (incluindo modo noturno).
+* **HTML5/CSS3:** Estruturação e estilização da interface 
 * **JavaScript (ES6+):** Lógica de manipulação de notas e persistência de dados.
 * **LocalStorage:** Utilizado para armazenamento offline dos dados.
 * **IA Assistiva:** Ferramentas de Inteligência Artificial foram utilizadas para otimização de algoritmos e estruturação de código.
